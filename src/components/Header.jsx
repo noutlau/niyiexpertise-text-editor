@@ -8,38 +8,36 @@ function Header({
   onRedo,
   darkMode,
   setDarkMode,
-   latency,
-  latencyStatus
-
+  latency,
+  history,
+  future,
 }) {
   return (
-  <header className="bg-white dark:bg-gray-800 border-b px-6 py-3 flex items-center justify-between shadow-sm">
+ <header className="flex w-full shadow-md">
 
-  <input
-  value={documentName}
-  onChange={(e) => setDocumentName(e.target.value)}
-  placeholder="Nom du document"
-  className="
-    text-lg font-semibold
-    px-3 py-2
-    rounded-lg
-    border border-gray-300 dark:border-gray-600
-    bg-gray-100 dark:bg-gray-800
-    outline-none
-    focus:border-blue-500 dark:focus:border-blue-400
-    focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400
-    transition
-    placeholder-gray-400 dark:placeholder-gray-500
-    w-64
-  "
-/>
+  
+  <div className="flex items-center justify-center w-1/3 bg-blue-500 dark:bg-blue-900 px-6 py-4">
+    <input
+      value={documentName}
+      onChange={(e) => setDocumentName(e.target.value)}
+      placeholder="Nom du document"
+      className="text-xl font-bold text-center bg-transparent text-white placeholder-white/60 outline-none w-full"
+    />
+  </div>
 
+  
+  <div className="flex-1 bg-white dark:bg-gray-900"></div>
 
-  <div className="flex items-center gap-4">
-   
+  
+  <div className="flex items-center justify-end gap-3 w-1/3 px-6 py-4 bg-white dark:bg-gray-900">
+
+    
     <button
       onClick={() => setDarkMode(!darkMode)}
-      className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded transition"
+      className="h-9 w-9 flex items-center justify-center
+                 bg-gray-200 dark:bg-gray-700
+                 rounded
+                 hover:scale-105 transition"
     >
       {darkMode ? "☀️" : "🌙"}
     </button>
@@ -47,45 +45,65 @@ function Header({
     
     <button
       onClick={onUndo}
-      className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
+      disabled={history.length === 0}
+      className={`h-9 px-4 flex items-center justify-center
+        rounded text-sm font-medium transition
+        ${
+          history.length === 0
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm"
+        }`}
     >
-      Undo
-    </button>
-    <button
-      onClick={onRedo}
-      className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
-    >
-      Redo
+      ↺ Undo
     </button>
 
    
- <div className="flex items-center gap-2 text-sm">
-  <span className="font-medium text-gray-600 dark:text-gray-300">Latence :</span>
-  <span
-    className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${latencyStatus.color}`}
-  >
-    ⚡ {latency} ms ({latencyStatus.label})
-  </span>
-</div>
+    <button
+      onClick={onRedo}
+      disabled={future.length === 0}
+      className={`h-9 px-4 flex items-center justify-center
+        rounded text-sm font-medium transition
+        ${
+          future.length === 0
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm"
+        }`}
+    >
+      ↻ Redo
+    </button>
 
-
-
-
-
+    
     <span
-      className={`px-3 py-1 text-xs rounded font-medium ${
-        connectionStatus === "Connecté"
-          ? "bg-green-100 text-green-700"
-          : connectionStatus === "Synchronisation..."
-          ? "bg-yellow-100 text-yellow-700"
-          : "bg-red-100 text-red-700"
-      }`}
+      className={`h-9 px-3 flex items-center justify-center
+        rounded text-xs font-semibold
+        ${
+          latency < 300
+            ? "bg-green-100 text-green-700"
+            : latency < 800
+            ? "bg-yellow-100 text-yellow-700"
+            : "bg-red-100 text-red-700"
+        }`}
+    >
+      ⚡ {latency} ms
+    </span>
+
+    
+    <span
+      className={`h-9 px-3 flex items-center justify-center
+        rounded text-xs font-semibold
+        ${
+          connectionStatus === "Connecté"
+            ? "bg-green-100 text-green-700"
+            : connectionStatus === "Synchronisation..."
+            ? "bg-yellow-100 text-yellow-700"
+            : "bg-red-100 text-red-700"
+        }`}
     >
       {connectionStatus}
     </span>
+
   </div>
 </header>
-
   );
 }
 

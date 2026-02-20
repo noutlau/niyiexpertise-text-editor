@@ -12,13 +12,12 @@ function App() {
   { id: 3, name: "Charlie", color: "bg-green-500", operations: 0 },
 ]);
 
-
-
 const [content, setContent] = useState(() => {
   const saved = localStorage.getItem("document-content");
   return saved ? saved : "";
 });
 
+const [remoteCursor, setRemoteCursor] = useState(null);
 
 const [darkMode, setDarkMode] = useState(false);
 
@@ -31,17 +30,16 @@ const [darkMode, setDarkMode] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
-const [history, setHistory] = useState([]);
-const [future, setFuture] = useState([]);
-const [documentName, setDocumentName] = useState("Mon Document");
-
-const handleChange = useCallback((e) => {
+  const [history, setHistory] = useState([]);
+  const [future, setFuture] = useState([]);
+  const [documentName, setDocumentName] = useState("Mon Document");
+  const handleChange = useCallback((e) => {
   const newValue = e.target.value;
 
   setHistory((prev) => [...prev, content]);
   setFuture([]);
 
-  // Mise à jour immédiate
+
   setContent(newValue);
 
   setConnectionStatus("Synchronisation...");
@@ -55,7 +53,7 @@ const handleChange = useCallback((e) => {
   setTimeout(() => {
     setTypingUser(null);
 
-    const packetLost = Math.random() < 0.01;
+  const packetLost = Math.random() < 0.01;
 
     if (packetLost) {
       setConnectionStatus("Erreur réseau");
@@ -93,36 +91,44 @@ useEffect(() => {
 
 useEffect(() => {
   const interval = setInterval(() => {
+  const randomUser = Math.random() < 0.5 ? "Bob" : "Charlie";
 
-    const randomUser = Math.random() < 0.5 ? "Bob" : "Charlie";
-
+   
     setTypingUser(randomUser);
 
     setTimeout(() => {
-      setTypingUser(null);
+      
+      setContent((prev) => {
+const newText = prev + `\nAjout par ${randomUser}`;
 
-      setContent((prev) => prev + `\nAjout par ${randomUser}`);
+        
+        setRemoteCursor({
+          user: randomUser,
+          position: newText.length,
+        });
 
+        return newText;
+      });
+
+      
       setUsers((prev) =>
         prev.map((u) =>
-          u.name === randomUser
-            ? { ...u, operations: u.operations + 1 }
-            : u
+          u.name === randomUser ? { ...u, operations: u.operations + 1 } : u
         )
       );
 
+      
       setLogs((prev) => [
         ...prev,
         `✏️ ${randomUser} a modifié le document`,
       ]);
 
-    }, 1000);
+      setTypingUser(null);
+    }, 1000); 
+  }, 6000); 
 
-  }, 6000);
-
-  return () => clearInterval(interval);
+  return () => clearInterval(interval); 
 }, []);
-
 
 
 const handleUndo = () => {
@@ -185,7 +191,7 @@ const latencyStatus = getLatencyStatus();
   return (
     <div className="h-screen flex flex-col">
 
-      {/* HEADER */}
+     
      <Header
   documentName={documentName}
   setDocumentName={setDocumentName}
@@ -196,18 +202,21 @@ const latencyStatus = getLatencyStatus();
   setDarkMode={setDarkMode}
   latency={latency}
   latencyStatus={latencyStatus}
+   history={history}
+  future={future}
 />
 
 
 
-      {/* MAIN CONTENT */}
-     <div className="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0 bg-white dark:bg-gray-900">
-
-
-        {/* LEFT PANEL */}
-        <aside className="hidden md:block md:w-1/5 border-r bg-gray-50 dark:bg-gray-800 p-4 overflow-y-auto">
-          <h2 className="font-bold mb-4">Utilisateurs actifs</h2>
-
+   
+<div className="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0 bg-white dark:bg-gray-900">
+  <aside className="hidden md:block md:w-1/5 border-r bg-gray-50 dark:bg-gray-800 p-4 overflow-y-auto">
+       <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider 
+               text-gray-600 dark:text-gray-400 
+               mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+               <span>👥</span>
+               Utilisateurs actifs
+        </h2>
           {users.map((user) => (
             <div
               key={user.id}
@@ -215,13 +224,13 @@ const latencyStatus = getLatencyStatus();
               <div className="flex items-center">
                 <div className={`w-3 h-3 rounded-full mr-2 ${user.color}`}></div>
                 <div className="flex flex-col">
-  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-    {user.name}
-  </span>
-  <span className="text-xs text-gray-400">
-    Ops: {user.operations}
-  </span>
-</div>
+               <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                {user.name}
+              </span>
+              <span className="text-xs text-gray-400">
+                Ops: {user.operations}
+              </span>
+            </div>
 
               </div>
 
@@ -232,18 +241,16 @@ const latencyStatus = getLatencyStatus();
           ))}
         </aside>
 
-        {/* CENTER EDITOR */}
+      
        <main className="flex-1 bg-white dark:bg-gray-900 p-4 min-h-0">
          <Editor
   content={content}
   onChange={handleChange}
+  remoteCursor={remoteCursor}
 />
         </main>
 
-        {/* RIGHT PANEL */}
         <aside className="hidden md:flex md:w-1/5 border-l bg-gray-50 dark:bg-gray-800 p-4 flex-col min-h-0">
-
-          {/* Tabs */}
           <div className="flex mb-4 shrink-0">
             <button
               onClick={() => setActiveTab("logs")}
@@ -268,7 +275,7 @@ const latencyStatus = getLatencyStatus();
             </button>
           </div>
 
-          {/* Content */}
+        
           <div className="flex-1 flex flex-col min-h-0">
 
             {activeTab === "logs" && (
@@ -312,7 +319,7 @@ const latencyStatus = getLatencyStatus();
               <div className="flex items-center gap-2 shrink-0">
  
 <div className="flex items-center gap-2 w-full max-w-md">
-  {/* Input */}
+
   <input
     type="text"
     value={newMessage}
@@ -336,7 +343,6 @@ const latencyStatus = getLatencyStatus();
     "
   />
 
-  {/* Bouton */}
   <button
     onClick={sendMessage}
     className="
@@ -366,13 +372,13 @@ const latencyStatus = getLatencyStatus();
           </div>
         </aside>
       </div>
+<footer className="bg-blue-500 dark:bg-blue-900 text-white p-4 text-sm flex justify-between shrink-0 shadow-md">
+  <span className="font-medium">Taille : {content.length} caractères</span>
+  <span className="font-medium">Latence : {latency} ms</span>
+   <span>Versions : {history.length}</span>
+  <span className="font-medium">Mode : Simulation</span>
+</footer>
 
-      {/* FOOTER */}
-      <footer className="bg-gray-800 dark:bg-gray-950 text-white p-4 text-sm flex justify-between shrink-0">
-        <span>Taille : {content.length} caractères</span>
-        <span>Latence : {latency} ms</span>
-        <span>Mode : Simulation</span>
-      </footer>
     </div>
   );
 }
