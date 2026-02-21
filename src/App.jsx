@@ -217,28 +217,36 @@ const latencyStatus = getLatencyStatus();
                <span>👥</span>
                Utilisateurs actifs
         </h2>
-          {users.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-              <div className="flex items-center">
-                <div className={`w-3 h-3 rounded-full mr-2 ${user.color}`}></div>
-                <div className="flex flex-col">
-               <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                {user.name}
-              </span>
-              <span className="text-xs text-gray-400">
-                Ops: {user.operations}
-              </span>
-            </div>
+       {users.map((user) => (
+  <div
+    key={user.id}
+    className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+  >
+    <div className="flex items-center">
+      {/* Avatar */}
+      <div
+        className={`w-8 h-8 rounded-full mr-3 flex items-center justify-center text-white text-sm font-bold shadow-md ${user.color}`}
+      >
+        {user.name.charAt(0).toUpperCase()}
+      </div>
 
-              </div>
+      <div className="flex flex-col">
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+          {user.name}
+        </span>
+        <span className="text-xs text-gray-400">
+          Ops: {user.operations}
+        </span>
+      </div>
+    </div>
 
-              {typingUser === user.name && (
-                <span className="text-xs text-blue-500">écrit...</span>
-              )}
-            </div>
-          ))}
+    {typingUser === user.name && (
+      <span className="text-xs text-blue-500 animate-pulse">
+        écrit...
+      </span>
+    )}
+  </div>
+))}
         </aside>
 
       
@@ -375,7 +383,6 @@ const latencyStatus = getLatencyStatus();
 <footer className="bg-blue-500 dark:bg-blue-900 text-white p-4 text-sm flex justify-between shrink-0 shadow-md">
   <span className="font-medium">Taille : {content.length} caractères</span>
   <span className="font-medium">Latence : {latency} ms</span>
-   <span>Versions : {history.length}</span>
   <span className="font-medium">Mode : Simulation</span>
 </footer>
 
